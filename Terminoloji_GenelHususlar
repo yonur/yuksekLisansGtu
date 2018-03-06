@@ -8,3 +8,20 @@ gerilim verebilir.
 2- Yük: Eğer daha yüksek akım çekilirse batarya daha çabuk tükenir. Bu da  bir etken.
 
 3- Yaş: Kapasite ne kadar çok doldur boşalt yapılmışsa(cycle) geçmişte deşarj süresi de o kadar kısalır.
+
+Not: Battery Fuel Gauge devrelerinde genelde I2C ile Battery Fuel Gauge batarya kalan ömür tahmin değerini ana miktocontrolöre 
+iletmektedir.
+
+Firmalar ve Ürünleri:
+
+MAXIM: 
+Link: https://www.maximintegrated.com/en/design/partners-and-technology/design-technology/modelgauge-battery-fuel-gauge-technology.html
+Dikkat Çeken Ürünler: MAX17201/MAX17205/MAX17211/MAX17215 
+Açıklama: Model Gauge adında bit algortima geliitirmişler. Bu yöntem klasik bir direnç yardımıyla bataryadan gelen akımın 
+coulomb countig yöntemi yardımıyla batarya kalan ömür değerlendirilmesinden farklı olarak daha önceden varolan bataryanın parametreleri
+yardımıyla bataryanın OCV(Open Circuit Voltage)' sinin değerlendirlmesi ile entegre içinde bir simetif SOC değeri veriliyor. Coulomb counting
+yönteminin kullanıldığı durumdaki direnç olmadığı için ısınma power dissapption olmamaktadır. Modelgauge M3' te sadece bu simulasyon yöntemi 
+kullanılmaktadır. Modelgauge M5' te ise hem modelgauge simulasyon yöntemi hem de direnç ile coulomb counting yöntemi kıllanılmaktadır. Çünkü 
+Coulomb counting kısa süreli sonuçlarda ve lineerlik açısından daha iyi.
+Fakat bu yöntemin olduğu ürünler biraz pahalı galiba. ŞEMATİK YOK GELİŞTİRME KİTİNİN. SADECE GEREBR KOYMUŞLAR.
+
