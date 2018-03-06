@@ -1,0 +1,10 @@
+Batarya' nın verdiği gerilim bataryanın kapasitesi olan gerilimden iç empedansının verdiği akımla çarpımımndan çıkarılması ile elde edilir.
+Yani formüle edersek: V = Vc - I*R;
+Burada kapasitenin deşarj durumunu etkileyen etmenler:
+
+1- Sıcaklık: Sıcaklık düştükçe iç empedans artar ve Kapasitenin daha çabuk tükenir ve aynı yük için dahah yüksek sıcaklığa göre daha düşük
+gerilim verebilir.
+
+2- Yük: Eğer daha yüksek akım çekilirse batarya daha çabuk tükenir. Bu da  bir etken.
+
+3- Yaş: Kapasite ne kadar çok doldur boşalt yapılmışsa(cycle) geçmişte deşarj süresi de o kadar kısalır.
