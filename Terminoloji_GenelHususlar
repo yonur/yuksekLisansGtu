@@ -12,6 +12,18 @@ gerilim verebilir.
 Not: Battery Fuel Gauge devrelerinde genelde I2C ile Battery Fuel Gauge batarya kalan ömür tahmin değerini ana miktocontrolöre 
 iletmektedir.
 
+Klasik Fuel Gauging Yöntemleri:
+
+1- Voltage Based: SOC = f(VBAT) -> Kalan gerilim seviyesine göre gerilim ölçerek yapılıyor. Pek sağlıklı değil çünkü yükü hiç hesaba katmıyor. 
+Bataryaya yük bağlı değilken faydalı olabilir.
+2- Coulomb Counting: Q = integral(i*dt) -> Akım ölçerek mevcut zamandaki harcanan ve kalan toplam batarya kapasiesi göz önüne alınarak 
+tahmin yürütülüyor. Bunu da yük etkiler ama Voltage Based kadar değil. 
+3- Impedance Track: V = Vocv - I * Rbat -> Voltage Based ile Coulomb counting'in karışımı. Örneğin Coulomb counting'te ilk tehlike çanlarının çaldığı gerilim seviye
+oranınımıza mesela %7'ye bataryanın düşme annı takip ettiğimizi düşünelim. Coulomb counting'te akım takip ederek tükenen kapasieyi takip 
+ettiğimiz için bataryadan çok yük çekildiğinde bataryanın beklenenden daha çabuk gerilim tüketmesi toplam kapasitenin daha %30' u varken
+bataryaya çok yük asıldığımız için %7 seviyesindeki gerilim seviyesine düşebilir. Bu sebeple Coulomb Counting'i Voltage based ile karıştırarak
+Impedance Track yöntemini kullanırız -> CEDV. 
+
 Firmalar ve Ürünleri:
 
 MAXIM: 
@@ -25,3 +37,7 @@ kullanılmaktadır. Modelgauge M5' te ise hem modelgauge simulasyon yöntemi hem
 Coulomb counting kısa süreli sonuçlarda ve lineerlik açısından daha iyi.
 Fakat bu yöntemin olduğu ürünler biraz pahalı galiba. ŞEMATİK YOK GELİŞTİRME KİTİNİN. SADECE GEREBR KOYMUŞLAR.
 
+TI:
+Link: https://training.ti.com/single-cell-gauging-101-classic-fuel-gauging-approaches?cu=1127702
+Dikkat Çeken Ürünler:
+Açıklama: 
