@@ -8,6 +8,7 @@ Link:
 
 MAXIM:
 Ürün: MAX32630FTHR -> Üzerinde MAX17055 battery fuel gauge var
+                       MAX17048 Fuel Gauge 
 Link:
 
 U-BLOX:
@@ -16,7 +17,7 @@ Link:
 
 TI:
 Ürün: Fuel Tank MKII Battery BoosterPack Plug-In Module (Üzerinde BQ27441 Baattery Fuel Gauge BQ24250 Lithium Polymer Charger var)
-      TMP75B-Q1(Sıcaklık Sensörü) (automotive grade)
+      
       INA226 akım ve güç ölçer (automotive grade)
       LTC2942 sıcaklık ve gerilim ölçerek gas gauge görevini görüyor.
 Link: http://www.ti.com/tool/boostxl-batpakmkii
