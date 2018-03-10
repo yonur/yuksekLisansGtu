@@ -40,10 +40,14 @@ Fakat bu yöntemin olduğu ürünler biraz pahalı galiba. ŞEMATİK YOK GELİŞ
 
 TI:
 Link: https://training.ti.com/single-cell-gauging-101-classic-fuel-gauging-approaches?cu=1127702
-Dikkat Çeken Ürünler: BQ2441, BQ34Z100-G1, BQ27425-G2B	
+Dikkat Çeken Ürünler: BQ2441, BQ34Z100-G1, BQ27425-G2B, DS2745	
 Açıklama: 
 CEDV-> Batarya yük ilk bağlandığında ani olarak düşme çıkmalar yaşayabilir gerilim seviyesinde. Bu yöntem 
 batarya gerilim seviyesi stabil olaba kadar gerekli beklemeyi yapıyort. Batarya yaşlandıkça bu yöntem Impedance Track' a göre daha hatalı sonuçlar
 vermektedir. 
 Impedance Track(IT)-> Ölçüm bu yöntemle daha gerçek zamanlı olarak ilerlemektedir. Ölçüm hata olasılığı CEDV'ye göre daha düşük. 
 IT-DVC -> Bu yöntemde IT' de olduğu gibi akım ölçmeye gerek duyulmuyor. Sadece gerilim ve sıcaklık kullanılıyor. 
+
+ST: 
+Ürün: STC3105
+
