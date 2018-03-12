@@ -28,26 +28,28 @@ Firmalar ve Ürünleri:
 
 MAXIM: 
 Link: https://www.maximintegrated.com/en/design/partners-and-technology/design-technology/modelgauge-battery-fuel-gauge-technology.html
-Dikkat Çeken Ürünler: MAX17201/MAX17205/MAX17211/MAX17215 
+Dikkat Çeken Ürünler: MAX17201/MAX17205/MAX17211/MAX17215, DS2745(evalboard 61.2 dolar)	 
 Açıklama: Model Gauge adında bit algortima geliitirmişler. Bu yöntem klasik bir direnç yardımıyla bataryadan gelen akımın 
 coulomb countig yöntemi yardımıyla batarya kalan ömür değerlendirilmesinden farklı olarak daha önceden varolan bataryanın 
 parametreleri yardımıyla bataryanın OCV(Open Circuit Voltage)' sinin değerlendirlmesi ile entegre içinde bir simetif SOC 
 değeri veriliyor. Coulomb counting yönteminin kullanıldığı durumdaki direnç olmadığı için ısınma power dissapption 
 olmamaktadır. Modelgauge M3' te sadece bu simulasyon yöntemi 
-kullanılmaktadır. Modelgauge M5' te ise hem modelgauge simulasyon yöntemi hem de direnç ile coulomb counting yöntemi kıllanılmaktadır. Çünkü 
-Coulomb counting kısa süreli sonuçlarda ve lineerlik açısından daha iyi.
+kullanılmaktadır. Modelgauge M5' te ise hem modelgauge simulasyon yöntemi hem de direnç ile coulomb counting yöntemi 
+kullanılmaktadır. Çünkü Coulomb counting kısa süreli sonuçlarda ve lineerlik açısından daha iyi.
 Fakat bu yöntemin olduğu ürünler biraz pahalı galiba. ŞEMATİK YOK GELİŞTİRME KİTİNİN. SADECE GEREBR KOYMUŞLAR.
 
 TI:
 Link: https://training.ti.com/single-cell-gauging-101-classic-fuel-gauging-approaches?cu=1127702
-Dikkat Çeken Ürünler: BQ2441, BQ34Z100-G1, BQ27425-G2B, DS2745	
+Dikkat Çeken Ürünler: BQ2441, BQ34Z100-G1, BQ27425-G2B, 
 Açıklama: 
 CEDV-> Batarya yük ilk bağlandığında ani olarak düşme çıkmalar yaşayabilir gerilim seviyesinde. Bu yöntem 
-batarya gerilim seviyesi stabil olaba kadar gerekli beklemeyi yapıyort. Batarya yaşlandıkça bu yöntem Impedance Track' a göre daha hatalı sonuçlar
-vermektedir. 
+batarya gerilim seviyesi stabil olaba kadar gerekli beklemeyi yapıyort. Batarya yaşlandıkça bu yöntem Impedance Track' a göre 
+daha hatalı sonuçlar vermektedir. 
 Impedance Track(IT)-> Ölçüm bu yöntemle daha gerçek zamanlı olarak ilerlemektedir. Ölçüm hata olasılığı CEDV'ye göre daha düşük. 
 IT-DVC -> Bu yöntemde IT' de olduğu gibi akım ölçmeye gerek duyulmuyor. Sadece gerilim ve sıcaklık kullanılıyor. 
 
 ST: 
 Ürün: STC3105
+
+
 
