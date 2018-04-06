@@ -12,4 +12,5 @@ Impedance Track™ Technology Enabled Battery Management Solution Reference Desi
 
 ti27220 -> Battery Gauge
 
-**** BMS 3029 LTC6811 Batary Management System ***** -> Mbed Kodu var
+**** BMS 3029 LTC6811 Batary Management System ***** -> Mbed Kodu var fakat ADUCM3029 Cortex M3 ile haberleşcek şekilde yazılmış.
+EVAL-ADICUP3029 Base Board diye bir board var. Bu mikrokontrollere sahip. wireless ve bluetooth basıyor datayı. 45$ civarı.
