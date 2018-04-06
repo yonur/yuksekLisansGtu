@@ -14,4 +14,49 @@ ti27220 -> Battery Gauge
 
 **** BMS 3029 LTC6811 Batary Management System ***** -> Mbed Kodu var fakat ADUCM3029 Cortex M3 ile haberleşcek şekilde yazılmış.
 EV-COG-AD3029LZ diye bir board var. Bu mikrokontrollere sahip. wireless ve bluetooth basıyor datayı. 50$ civarı. Ama Wifi module da
-ayrıca satılıyor. O da 50$. EVAL-ADICUP3029 Base Board diye bir board da var. O 45$. Belkki Wifi module içeriyo olabilir. Araştır. 
+ayrıca satılıyor. O da 50$. EVAL-ADICUP3029 Base Board diye bir board da var. O 45$. Belkki Wifi module içeriyo olabilir. Araştır.
+
+                                    LTC6811-1/ LTC6811-2 Multicell Battery Monitor
+Genel Özellikleri:
+•	12 Bataryaya kadar ölüm yapabiliyor.
+•	Maksimum toplam ölçüm hatası: 1.2mV
+•	isoSPI diye bir SPI haberleşme protokolü türü ile haberleşiyor. Linear teknoloji tarafından geliştirilmiş.
+•	ISO26262 standardına uyumlu. Özellikle otomotive özel ürün geliştirme için uygun.
+•	Programlanabilir zamanlayıcı ile pasif batarya hücresi dengelemesi yapıyor.
+•	I2C ile de kullanılabiliyor.
+Uygulamaları:
+•	Elektrikli ve Hybrid Elektrikli Araçlar
+•	Backup Batarya Sistemleri
+•	Grid Enerji Depolama
+•	Yüksek Güçlü Taşınabilir Ekipmanlar
+
+
+Pin Fonksiyonları:
+C0 - C12: Batarya hücrelerinin(her bir batarya kasıt) girişleri
+S1 - S12: Balance giriş/çıkışlar. 12 dahili N-MOSFET S(n) ve C(n-1) arasında hücrelerin boşaltımı için bağlanmıştır.
+V+: Pozitif güç kaynağı pini
+V-: Negatif güç kaynağı pinleri. V- pinleri IC'nin dışında kısa devre edilmelidirler.
+VREF2: Çoklu 10k thermistörleri sürmek için ikincil referans gerilimini besler.
+VREF1: ADC referans gerilimidir. Harici 1uF kapasitör ile bypas edilir. DC yüklere izin verilmez.
+GPIO[1:5]: Genel amaçlı I/O. Dijital inputlar yada outputlar olarak, ya da V- ile 5V aralığındaki analog girişler olarak 
+kullanılabilir. GPIO[3:5] I2C yada SPI port olarak kullanılabilir.
+DTEN: Deşarj timerını etkinleştirir. Bu pin deşarj timerı etkinleştirmek için VREG ile bağlanır.
+DRIVE: NPN'in base'i bu pine bağlanır. Kolektörü V+'ya ve emiteri VREG'e bağlayın.
+VREG: 5V regülatör girişi. Harici 1uF kapasitör ile bypass edilir.
+ISOCMD: Seri arayüz modu. ISOMD'yi VREG'e bağlamak LTC6811'in 41 ile 44 pinlerini arasını 2-hat izole arayüz (isoSPI) modu için
+konfigüre eder.
+ISOMD'yi V-'ye bağlamak LTC6811'i 4-hat SPI mod olarak konfigüre eder.
+WDT: Watchdog timer çıkış pini. Bu open drain NMOS dijital çıkışıdır. 1M direnç ile VREG'e bağlanmış yada bağlanmamış bırakılabilir.
+Eğer LTC6811 2 saniye içerisinde geçerli bir komut alamazsa, watchdog timer devresi LTC6811'i resetler ve WDT pini yüksek empedansa
+gider.
+CSB, SCK, SDI, SDO: 4-hat SPI'dır. Aktif düşük çip seçimi(CSB), seri clock(SCK) ve seri data girişi(SDI) dijital girişlerdir. Seri 
+data çıkışı(SDO) bir open drain NMOS çıkış pinidir. SDO 5k pull-up dirence ihtiyaç duyar.
+A0 - A3: Adres pinleri. Bu dijital girişler adreslenebilir seri komutlar için cip adesini set etmek amacıyla VREG yada V-'ye bağlanır.
+IPA,IMA: İzole edilmiş 2-dat seri arayüz port A. IPA(plus) ve IMA(minus) bir diferansiyel giriş/çıkış çiftidir.
+IPB,IMB: İzole edilmiş 2-dat seri arayüz port B. IPB(plus) ve IMB(minus) bir diferansiyel giriş/çıkış çiftidir.
+IBIAS: İzole edilmiş arayüz akım bias. Arayüz çıkış akım seviyesini ayarlamak için IBIAS bir gerilim bölücü ile V-'ye bağlanır.
+isoSPI arayüzü etkinleştirildiği zaman, IBIAS pin voltajı 2 volt olur. IPA/IMA yada IPB/IMB çıkış akımı IB'nin 20 katı olacak şekilde
+IBIAS pininden beslenir.
+ICMP: İzole edilmiş arayüz komparatör gerilim seviyesini set etmek için kullanılır. Bu pin isoSPI alıcı komparatörlerinin gerilim seviyesini 
+set etmek için IBIAS ve V- arasındaki gerilim bölücüye bağlanır. Komparator seviyeleri ICMP pinindeki gerilim seviyesinin yarısı
+olarak set edilir.  
