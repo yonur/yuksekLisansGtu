@@ -66,28 +66,28 @@ State Diagramı:
 LTC6811'in çalışması 2 ana kısma ayrılır: CORE devre ve isoSPI devre. Her iki kısmın bağımsız çalışma yapıları vardır, kapanma timeout'u
 gibi.
 
-Core LTC6811 Durumu Tanımı:
+CORE LTC6811 Durumu Tanımı:
 
-Sleep Durumu:
+SLEEP Durumu:
 Referans ve ADC'lerin enerjisi kesilir. Watchdog timer (watchdog ve discharge timer'a baknız) zaman aşımı olmuştur. Discharge timer ya 
 etkisizleştirilmiş ya da zaman aşımına uğramıştır. Kaynak akımları minimum seviyelere indirilmiştir. isoSPI portları IDLE durumda
 olacaktır. Drive pin 0V olacaktır. Bir wakeup sinyal alınırsa(seri arayüzün uyandırılmasına bakınız), LTC6811 STANDBY duruma geçecektir.
 
-Standby Durumu: Reference ve ADCler off durumundadır. Watchdog timer ve/yada discharge timer calisir. DRIVE pin VREG pinini harici bir 
+STANDBY Durumu: Reference ve ADCler off durumundadır. Watchdog timer ve/yada discharge timer calisir. DRIVE pin VREG pinini harici bir 
 transistor ile 5V'a kadar enerjilendirir.(Alternatif olarak, VREG harici bir kaynakla da enerjilendirilebilir).
 Geçerli bir ADC komutu alındığında yada konfigürasyon register grubundaki REFON biti 1 olarak set edildiğinde, IC, referansın enerjilendirlmesi
 ve ardından REFUP yada MEASURE duruma geçilmesinin mümkün olması için tREFUP süresi kadar bekler. Aksihalde, tSLEEP süresi kadar geçerli 
 komut alınmazsa(watchdog ve discharge timerin her  ikisininde süresi dolduğunda), LTC6811, SLEEP duruma döner. Eğer discharge zamanlayıcısı 
 deaktif edilirse, yalnız watchdog timer ile bağlantılı olur.
 
-Refup Durumu: Bu duruma erişmek için Konfigürasyon register gruptaki REFON biti 1 olarak set edilmelidir(WRCFGA komutu kullanılarak,
+REFUP Durumu: Bu duruma erişmek için Konfigürasyon register gruptaki REFON biti 1 olarak set edilmelidir(WRCFGA komutu kullanılarak,
 tablo 38'e bakınız). ADC'ler off olur. Referans, LTC6811 STANDBY durumundan daha hızlı bir şekilde ADC dönüşümlerini ilklendirsin diye 
 enerjilendirilir.
 Geçerli bir ADC komutu alındığında, IC dönüşümü başlatmak için MEASURE durumuna geçer. Aksi halde, LTC6811, REFON biti 0 olarak set 
 edildiğinde, ya manuel olarak (WRCFGA komutunu kullanarak) yada otomatik olarak watchdog timerın süresi dolduğunda STANDBY duruma geçer
 (her iki timerin süresi dolarsa LTC6811 direk SLEEP duruma geçecektir).
 
-Measure Durumu: LTC6811 bu durumda ADC dönüşümlerini icra eder.Referans ve ADClerin enerjisi kesilir. 
+MEASURE Durumu: LTC6811 bu durumda ADC dönüşümlerini icra eder.Referans ve ADClerin enerjisi kesilir. 
 ADC donusum tamamlandıktan sonra, LTC6811 REFON bitin durumuna göre ya REFUP'a yada STANDBY duruma geçer. Ek olarak ADC dönüşümler REFON 
 durumunun avantajlarından istifade etmek için REFON bitini 1 olarak set edip daha hızlı olarak ilklendirilebilir. 
 Not: Non-ADC komutlar core durum dönüşümüne sebep olmazlar. Sadece bir ADC dönüşüm yada dignostic komutlar MEASURE durumunda CORE'a yer 
@@ -96,9 +96,23 @@ verir.
 isoSPI Durumu Tanımı:
 Not: LTC6811-1, daisy-chain muhebere için iki adet isoSPI portuna(A ve B) sahiptir. LTC6811-2 paralel-adreslenebilir muhabere için yalnız
 bir adet isoSPI porta(A) sahiptir.
-IDLE Durumu: isoSPI portlarının enerjisi kesilir.
-isoSPI portA WAKEUP sinyalini aldığında(seri arayüzü uyandırmaya bakınız), isoSPI READY durumuna geçer.
 
+IDLE Durumu: isoSPI portlarının enerjisi kesilir.
+isoSPI portA WAKEUP sinyalini aldığında(seri arayüzü uyandırmaya bakınız), isoSPI READY durumuna geçer. Bu dönüşüm eğer Core STANDBY 
+durumda ise hızlı bir şekilde olur çünkü DRIVE ve VREG pinleri hali hazırda bayaslanmıştır. Eğer core, isoSPI WAKEUP sinyali aldığında
+SLEEP durumunda ise, component tWAKE süresi içerisinde READY durumuna geçer.
+
+READY Durumu: isoSPI portu/portları muhabere için hazırdır. PortB sadece LTC6811-1 için etkinleştirilir ve LTC6811-2' de mevcut değildir.
+Bu durumdaki seri arayüz akımı komponentin LTC6811-1 yada LTC6811-2 olmasına, ISOMD pininin durumuna ve RBIAS = RB1 + RB2 
+(IBIAS pinine bağlı olan harici dirençler)e bağlıdır.
+Eğer port A'da tIDLE=5.5ms'den daha uzun süre aktivite yoksa(örneğin WAKEUP sinyali yok), LTC6811 IDLE durumuna gider. Seri arayüz data
+ilettiğinde yada aldığında LTC6811 ACTIVE duruma geçer.
+ACTIVE Durumu: LTC6811 isoSPI portların birini yada her ikisini kullanarak data iletip alır. Seri arayüzü bu durumda maksimum güç tüketir.
+Akım kaynağı isoSPI palsları artınca saat frekansının artmasıyla artar.
+Güç Tüketimi: LTC6811 V+ ve VREG pinleri ile enerjilendirilir. V+ girişi batarya hücresi en üst seviyesi voltajının 0.3V altına veya daha 
+üst seviyesindeki gerilime ihtiyaç duyar ve core devre sisteminin yüksek gerilimli elemanlarına güç sağlar. 
+VREG girişi 5V'a ihtiyaç duyar ve core devre sisteminin kalan elemanları ile isoSPI devre sistemine enerji sağlar. VREG girişi, regüle
+edilmiş DRIVE çıkış pininden sürülen harici bir transistör ile enerjilendirilebilir. Alternatif olarak, VREG harici bir kaynak ile 
 
 
 
