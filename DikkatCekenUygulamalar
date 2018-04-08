@@ -88,4 +88,17 @@ edildiğinde, ya manuel olarak (WRCFGA komutunu kullanarak) yada otomatik olarak
 (her iki timerin süresi dolarsa LTC6811 direk SLEEP duruma geçecektir).
 
 Measure Durumu: LTC6811 bu durumda ADC dönüşümlerini icra eder.Referans ve ADClerin enerjisi kesilir. 
-ADC donusum tamamlandıktan sonra, LTC6811 REFON bitin durumuna göre ya REFUP'a yada STANDBY duruma geçer. 
+ADC donusum tamamlandıktan sonra, LTC6811 REFON bitin durumuna göre ya REFUP'a yada STANDBY duruma geçer. Ek olarak ADC dönüşümler REFON 
+durumunun avantajlarından istifade etmek için REFON bitini 1 olarak set edip daha hızlı olarak ilklendirilebilir. 
+Not: Non-ADC komutlar core durum dönüşümüne sebep olmazlar. Sadece bir ADC dönüşüm yada dignostic komutlar MEASURE durumunda CORE'a yer 
+verir.
+
+isoSPI Durumu Tanımı:
+Not: LTC6811-1, daisy-chain muhebere için iki adet isoSPI portuna(A ve B) sahiptir. LTC6811-2 paralel-adreslenebilir muhabere için yalnız
+bir adet isoSPI porta(A) sahiptir.
+IDLE Durumu: isoSPI portlarının enerjisi kesilir.
+isoSPI portA WAKEUP sinyalini aldığında(seri arayüzü uyandırmaya bakınız), isoSPI READY durumuna geçer.
+
+
+
+
