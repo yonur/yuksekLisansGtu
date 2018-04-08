@@ -112,7 +112,19 @@ Akım kaynağı isoSPI palsları artınca saat frekansının artmasıyla artar.
 Güç Tüketimi: LTC6811 V+ ve VREG pinleri ile enerjilendirilir. V+ girişi batarya hücresi en üst seviyesi voltajının 0.3V altına veya daha 
 üst seviyesindeki gerilime ihtiyaç duyar ve core devre sisteminin yüksek gerilimli elemanlarına güç sağlar. 
 VREG girişi 5V'a ihtiyaç duyar ve core devre sisteminin kalan elemanları ile isoSPI devre sistemine enerji sağlar. VREG girişi, regüle
-edilmiş DRIVE çıkış pininden sürülen harici bir transistör ile enerjilendirilebilir. Alternatif olarak, VREG harici bir kaynak ile 
+edilmiş DRIVE çıkış pininden sürülen harici bir transistör ile enerjilendirilebilir. Alternatif olarak, VREG harici bir kaynak ile
+enerjilendirilebilir.
+Güç tüketimi çalışma aşamasına göre değişir. Tablo 1 ve Tablo 2 her bir aşamadaki kaynak pin akımını yaklaşık olarak elde etmek için
+eşitlikler sağlamaktadır. V+ pin akımı sadece core aşamasına  bağımlıdır. Buna rağmen, VREG pin akımı Core aşamasının ve isoSPI aşamasının
+her ikisine de bağımlıdır, ve bundan dolayı iki komponente ayrılabilir. isoSPI arayüzü sadece VREG pininden akım çeker.
+IREG = IREG(Core) + IREG(isoSPI)
+SLEEP aşamasında VREG pini harici bit kaynaktan enerjilendirildiyse yaklaşık olarak 2.2uA akım çeker. Aksi halde, V+ pini gerekli akımı
+sağlar.
+ADC Çalışması: 
+LTC6811 içerisinde 2 adet ADC vardır. 2 ADC, 12 batarya hücresini ölçerken simültane olarak çalışırlar. Yalnızca 1 ADC genel amaçlı 
+girişleri ölçmek için kullanılır. Aşağıdaki açıklamalarda bir ADC terimini bir yada her iki ADCyi adlandırmak için kullanılmaktadır.
+ADC1 ve ADC2 terimleri iki devreyi birbirinden zaman diyagramında ayırmak gerektiğinde kullanılmaktadır.
+ADC Modları: 
 
 
 
