@@ -124,7 +124,25 @@ ADC Çalışması:
 LTC6811 içerisinde 2 adet ADC vardır. 2 ADC, 12 batarya hücresini ölçerken simültane olarak çalışırlar. Yalnızca 1 ADC genel amaçlı 
 girişleri ölçmek için kullanılır. Aşağıdaki açıklamalarda bir ADC terimini bir yada her iki ADCyi adlandırmak için kullanılmaktadır.
 ADC1 ve ADC2 terimleri iki devreyi birbirinden zaman diyagramında ayırmak gerektiğinde kullanılmaktadır.
-ADC Modları: 
+
+ADC Modları: Configuration register gruptaki ADC0PT biti(CFGR0[0]) ile dönüşüm komutundaki mod seçim bitleri MD[0:1] beraber, farklı
+oversampling ratio(OSR)ler sağlayan ADC'nin 8 çalışma modunu sağlar. Bu modların doğruluk ve zamanlaması tablo 3'te özetlenmiştir.
+Her bir modda, ADC ilk olarak girişleri ölçer, ve sonrasında her bir kanal için kalibrasyon icra eder. Modların isimlendirmesi 
+ADC ölçümünün -3dB bantgenişliğine dayanmaktadır. 
+
+Mode 7kHz (Normal): Bu modda, ADC' nin yüksek çözünürlük ve düşük TME(toplam ölçüm hatası) değeri vardır. Bu mod hız ve doğruluğun optimumu
+kombinasyonuna sahip olduğu için normalde varsayılan çalışma modu olarak kabul edilir.
+
+Mode 27kHz (Fast): Bu modda, ADC maksimum işlem hacmine sahiptir fakat TME(toplam ölçüm hatası)de bir miktar artışa neden olmaktadır.
+Bundan dolayı, bu mod hızlı mod olarak adlandırılmaktadır. Hızdaki artış örnekleme oranındaki(OSR) azalmadan gelmektedir. Bu durumda
+gürültü ve ortalama ölçüm hatasında artışa sebebiyet vermektedir.
+
+Mode 26Hz(Filtrelenmiş): Bu modda, ADC dijital filtre -3dB frekansını OSR(örnekleme oranı)'yi arttırarak 26Hz'e indirmektedir.
+Bu mod aynı zamanda düşük -3dB frekansından dolayı filtrelenmiş mod olarak da adlandırılır. Daha düşük gürültü seviyesine
+sahip olarak 7kHz(Normal) ile benzer doğruluk seviyesine sahiptir. 
+
+14kHz, 3kHz, 2kHz, 1kHz ve 422Hz modları:
+
 
 
 
