@@ -141,7 +141,31 @@ Mode 26Hz(Filtrelenmiş): Bu modda, ADC dijital filtre -3dB frekansını OSR(ör
 Bu mod aynı zamanda düşük -3dB frekansından dolayı filtrelenmiş mod olarak da adlandırılır. Daha düşük gürültü seviyesine
 sahip olarak 7kHz(Normal) ile benzer doğruluk seviyesine sahiptir. 
 
-14kHz, 3kHz, 2kHz, 1kHz ve 422Hz modları:
+14kHz, 3kHz, 2kHz, 1kHz ve 422Hz modları: 14kHz, 3kHz, 2kHz, 1kHz ve 422Hz ADC dijital filtresi -3dB frekansını 13.5kHz, 3.4kHz
+1.7kHz, 845Hz, 422Hz ek opsiyonlarında set etmeyi sağlar.
+14kHz modun doğruluğu 27kHz(fast mod) ile benzerdir. 3kHz, 2kHz, 1kHz ve 422Hz modların doğruluğu 7kHz(normal mod) ile benzerdir.
+Bu modların bantgenişlikleri ve dönüşüm zamanları datasheet(veri föyü)teki tablo 3 ve 5'te verilmiştir. Eğer Core STANDBY modda
+ise, ADC dönüşümlerini başlatmadan önce refereansı enerjilendirmek için ek tREFUP kadar süreye ihtiyaç duyulmaktadır. Konfigürasyon 
+register gruptaki REFON  biti 1 olarak set edildiği takdirde ADC dönüşümleri arasında referans enerjili kalabilir bundan dolayı 
+Core tREFUP süre sonra REFUP state'te olur. Sonrasında, takip eden ADC komutları ADC dönüşümÜ için tREFUP süresi kadar beklemeyecektir.
+ADC Aralığı ve Çözünürlüğü: C ve GPIO girişleri aynı aralık ve çözünürlüğe sahiptir. LTC6811 içerisindeki ADC yaklaşık olarak 
+-0.82V ila +5.73V aralığa sahiptir. Negatif okumalar yaklaşık olarak 0V değerindedir. Data formatı LSB'nin 100uV'ı temsil ettiği
+16bit unsigned integerdır.  Bundan dolayı, 0x80E8(desimal 33000) 3.3V'ı temsil etmektedir. 
+Delta sigma ADClerin giriş volatajına bağımlı olan niceleme gürültüsü vardır, özellikle düşük OSR'de, örneğin FAST modda. Bazı
+ADC modlarında, niceleme gürültüsü giriş gerilimi ADC aralığının üst ve alt sınırlarına eristiğinde artar. Örneğin, giriş 
+gerilimi ile ölçüm gürültüsünün karşılıklı değerleri normal ve filtrelenmiş modda datasheetteki şekil-2'de gösterilmiştir.
+Şekil-2'de ADC giriş gerilim aralığı 0V ile 5V arasındadır. Tablo-4'te, ADC 0.5V ila 4.5V aralığında verilmiştir.
+Bu aralıkta OSR modunda bile niceleme gürültüsü nispeten sabittir. Tablo-4, bu aralıkta 8 ADC çalışma modunda toplam gürültü değerlerini
+özetlemektedir. Ayrıca gürültüsüz çözünürlük de gösterilmektedir. Örneğin, normal moddaki 14-bit gürültüsüz çözünürlükten kasıt
+normal modda DC girişin en yüksek 14 biti gürültüsüz değer olduğunu, fakat 15 ve 16.ncı LSB bitlerin ise kırpışacağını(flicker)
+ifade etmektir.
+ADC Aralığı vs Voltaj Referans Değeri: 
+Tipik olarak ADCler voltaj refernasının değerinin iki katı bir aralığa sahiptir, ve ADC ölçüm hatası voltaj refernasındaki hata 
+ile direk orantılıdır. LTC6811'nin ADC'si tipik değildir. VREF1'in kesin değeri, ADC'deki kazanç hatasını telafi etmek için
+aşağı ve yukarı doğru kırpılır. Bundan dolayı, ADC toplam ölçüm hatası(TME) özellikleri VREF1 özelliklerinden dah öncüldür.
+Örneğin, toplam ölçğm hatasının 25C özelliği 7kHz(normal) modda 3.300V ölçerken +/-1.2mY'tur.
+
+
 
 
 
