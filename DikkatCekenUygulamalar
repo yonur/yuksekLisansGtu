@@ -163,8 +163,13 @@ ADC Aralığı vs Voltaj Referans Değeri:
 Tipik olarak ADCler voltaj refernasının değerinin iki katı bir aralığa sahiptir, ve ADC ölçüm hatası voltaj refernasındaki hata 
 ile direk orantılıdır. LTC6811'nin ADC'si tipik değildir. VREF1'in kesin değeri, ADC'deki kazanç hatasını telafi etmek için
 aşağı ve yukarı doğru kırpılır. Bundan dolayı, ADC toplam ölçüm hatası(TME) özellikleri VREF1 özelliklerinden dah öncüldür.
-Örneğin, toplam ölçğm hatasının 25C özelliği 7kHz(normal) modda 3.300V ölçerken +/-1.2mY'tur.
-
+Örneğin, toplam ölçğm hatasının 25C özelliği 7kHz(normal) modda 3.300V ölçerken +/-1.2mV' tur ve VREF1 için 25C özelliği 
+3.200V+/-100mV' tur. 
+Ölçülen Hücre Gerilmleri(ADCV Komutu): ADCV komutu C0 ve C12 pinleri arasındaki batarya hücresi girişlerinin ölçümünü 
+ilklendirmektedir. Bu komutun ölçüm için kullanılacak kanal sayısını ADC modunu seçmek için opsiyonları vardır. Datasheetteki 
+şekil-3 bütün 12 batarya hücresini ölçen ADCV komutunun zamanlamasını göstermektedir. 12 hücrenin hepsini ölçmek için 
+ADCV komutunu aldıktan sonra, ADC1 sıralı olarak alt 6 hücreyi ölçer. ADC2 sıralı olarak üst 6 hücreyi ölçer. Hücre ölçümleri
+tamamlandıktan sonra, her bir kanal offset errorlarını silmek için kalibre edilir.
 
 
 
