@@ -1,17 +1,34 @@
-http://www.frank-zhao.com/thingspeak_mbed_tut1/ -> LPC1768 ile bataryanın sıcaklık ölçümünü yapmışlar.
+LTC6804 Çoklu Batarya Görüntüleme Entegresi:
+Seri Arayüzünün Genel Görünümü: 
+LTC6804'te 2 tip seri portlar vardır, biri 4-hat seri çevrebirimi arayüzü (SPI), biri 2-hat izole arayüz(isoSPI)dir. 41 ve 
+44 arasındaki pinler ISOMD pininin durumuna göre 2-hatlı yada 4-hatlı olarak konfigüre edilebilirler. LTC6804'ün 2 versiyonu
+vardır: LTC6804-1 ve LTC6804-2. LTC6804-1 daisy-chain konfigürasyonda, LTC6804-2 ise adreslenebilir bus konfigürasyonunda 
+kullanılmaktadır. LTC6804-2 45 ile 48 arasındaki pinleri V- yada VREG'e bağlayarak cihazın adresini set etmek için kullanmaktadır.
 
-https://learn.sparkfun.com/tutorials/ltc4150-coulomb-counter-hookup-guide -> Coulomb counter ile güzel bir uygulama var.
+4-Hat SPI Fiziksel Katmanı:
+Harici Bağlantılar: ISOMD'nin V-'ye bağlanması seri PORT A'yı 4-hat SPI için konfigğre eder. SDO, uygun bir kaynağa pullup direnci
+ile bağlanması gereken bir open-drain çıkıştır.
+Zamanlama: 4-hat seri port CPHA = 1 ve CPOL = 1 olarak kullanan bir SPI sistemi içerisinde çalışması için konfigüre edilmiştir.
+Sonuç olarak, SDI üzerindeki data SCK'nın yükselen kenarı boyunca stabil kalmak zorundadır. Zmanalama veriföyünde şekil.15'te 
+tasvir edilmiştir. Maksimum data rate 1Mbps'tir. 
 
-https://www.re-innovation.co.uk/docs/battery-monitor-ics/
-
-TI -> Multi-Cell 36-48V Battery Management System Reference Design
-(ACTIVE) TIDA-00792 (Referans Dizayn)
-
-Impedance Track™ Technology Enabled Battery Management Solution Reference Design
-(ACTIVE) TIDA-00050 (Referans Dizayn)
-
-ti27220 -> Battery Gauge
-
-**** BMS 3029 LTC6811 Batary Management System ***** -> Mbed Kodu var fakat ADUCM3029 Cortex M3 ile haberleşcek şekilde yazılmış.
-EV-COG-AD3029LZ diye bir board var. Bu mikrokontrollere sahip. wireless ve bluetooth basıyor datayı. 50$ civarı. Ama Wifi module da
-ayrıca satılıyor. O da 50$. EVAL-ADICUP3029 Base Board diye bir board da var. O 45$. Belkki Wifi module içeriyo olabilir. Araştır. 
+2-Hat İzole Arayüz(isoSPI) Fiziksel Katmanı: 
+2-hat arayüz LTC6804 cihazları basit twisted pair kablolama ile bağlamayı sağlamaktadır.
+Arayüz RF frekansta kablolama yapıldığı durumlar için düşük paket hatası olacak şekilde tasarlanmıştır. İzolasyon harici bir trafo
+ile elde edilmektedir.
+Standart SPI sinyallleri diferansiyel pulselar içine gömülmüştür. Transmisyon pulse'ının dayanıklılığı ve alıcının threshold 
+seviyesi harici iki direnç, RB1 ve RB2 tarafından teşkil edilmektedir.
+Veriföyünde şekil 16'da isoSPI devresinin nasıl çalıştığı gösterilmiştir. 2V bir referans IBIAS pinini sürmektedir. Harici RB1 ve
+RB2 dirençleri IB referans akımını oluşturmaktadır. Bu akım transmitter'in sürme gücünü belirlemektedir. RB1 ve RB2 aynı zamanda 
+ICMP pininde 2V referans olacak şekilde gerilim bölücüsü olarak bir yapı sağlamaktadır. Bu yapı alıcı devrenin threshold gerilim 
+seviyesini ayarlamaktadır. İletilen akım pulseları RM termination direnci(kablonun karakteritik empedansına paralel olacak şekilde)
+tarafından voltaja dönüştürülmektedir. 
+Harici Bağlantılar: LTC6804-1'nin PortA ve PortB olarak adlandırılan 2 adet seri portu vardır. PortB her zaman 2-hat arayüz(master)
+olarak tasarlanmaktadır. PortB her zaman 2 hat arayüz olarak konfigüre edilmektedir(master). Daisy-chain'deki final cihaz bu portu 
+kullanmaz, ve RM ile sonlandırılmalıdır(terminated).PortA ISOMD pininin bağlantısına göre ya 2-hat yada 4-hat arayüz(slave) olur.
+Veri föyündeki şekil-17a'da her birinin birer LTC6804-1 içerdiği çoklu eşlenik PCB'lerin birbirleri ile dayanıklı bir bağlantı
+yapısı oluşturmasına bir örnektir. Dasiy chain'deki son(final) cihazın sonlandırmasına dikkat ediniz. Mikroişlemci ayrı bir PCB'de 
+yer alacaktır. Mikro işlemci PCB'si ile ilk LTC6804-1 PCB'si arasında 2-hat izolasyon sağlamak için LTC6820 IC'sini kullanınız.
+LTC6820 veriföyündeki şekil-16'daki diyagram ile işlevsel olarak denktir.
+LTC6804-2'nin ISOMD pinindeki duruma bağlı olarak 2-hat yada 4-hat olabilen tek bir single seri portu(Port A) vardır. 2-hat için 
+konfigğre edildiğinde, veriföyündeki şekil-17b'de gösterildiği gibi
