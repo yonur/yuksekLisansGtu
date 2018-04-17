@@ -64,5 +64,65 @@ meydana gelmektedir. Her iki çıkış off olduğu zaman, yük direnci diferansi
 DC sinyal komponentlerini elemek ve güvenilirliği arttırmak için, isoSPI 2 farklı pulse uzunluğu kullanır. Bu tablo.21'de 
 gösterildiği gibi 4 tip pulse'a izin vermektedir. A + 1 pulse negatif pulse'ı izleyen pozitif bir pulse olarak iletilecektir.
 A - 1 pozitif pulse'ı izleyen negatif bir pulse olarak iletilecektir. Her bir pulse'ın uzunluğu t1/2PW olarak belirlenmiştir, 
-çünkü her biri simetrik çiftin yarısı kadardır.
+çünkü her biri simetrik çiftin yarısı kadardır.(Toplam isoSPI süresi 2*t1/2PW kadardır).
+Host mikrocontroller bu 2-hat arayüzü kullanmak için isoSPI pulselarını yaratmak zorunda değildir. Sistemdeki ilk LTC6804
+mikrokontroller ile PortA'sı üzerinden 4-hat SPI arayüzünü kullanarak haberleşir, daha sonrasında diğer LTC6804'ler ile 
+PortB'sini kullanarak 2-hat isoSPI arayüzü ile haberleşir. Alternatif olarak LTC6820 SPI sinyalleri isoSPI pulse'larına 
+dönüştürmek için kullanılabilir.
+LTC6804-1'in SPI için konfigüre edilen PortA ile Kullanılması:
+LTC6804 PortA ile SPI'yı kulllandığı zaman(ISOMD = V-) dört adet haberleşme hadisesinden birini kullanır: CSB düşen, 
+CSB yükselen, SDI = 0 iken SCK yükselen, ve SDI = 1 iken SCK yükselen. Her bir hadise LTC6804-1 daisy chain üzerinden iletimi 
+için 4 pulse tipinden birine dönüştürülür. Uzun pulse'lar CSB değişiklikleri için kısa pulse'lar data iletimi için 
+kullanılmaktadır, tablo-22'de gösterildiği üzere. İzolasyon barierin diğer tarafının üzerinde(örneğin kablonun diğer tarafında),
+ikinci LTC6804'in ISOMD = VREG olacaktır. Onun PortA'sı slave isoSPI arayüzü olarak çalışacaktır. İletilen her bir pulse alacak
+ve tablo.23'te görüldüğü gibi dahili olarak SPI sinyalini yeniden meydana getirecektir. Ek olarak, bir READ komutu boyunca bu 
+port geri dönüş data pulse'larını belki iletebilir. Düşük isoSPI portu asla uzun(CSB) pulse'lar iletmez. Dahası, slave bir 
+isoSPI port yalnızca kısa -1 pulse'ları iletir asla + iletemez. Master port bir null reponse'u lojik 1 olarak dikkate alır.  Bu
+tek bir kablo üzerinde kolezyon(multidrop) riski olmadan pek çok slave cihaza imkan vermektedir.
+Şekil-20'de daisy-chaine LTC6804-1 elemanının bir READ komutu için isoSPI zman diyagramı verilmiştir. ISOMD pini elemanın 
+altkısmındaki   V-'ye bağlanmıştır bundan dolayı PortA'sı SPI port(CSB, SCK, SDI ve SDO) olarak konfigüre edilmiştir. 
+Port(A ve B) parça numaraları ile isimlendirilerek üç bağlantılanmış cihazın isoSPI sinyalleri gösterilmiştir. Dikkat edilirse 
+ki ISO B1 be ISO A2 aslında aynı sinyaldir, fakat part1 ve part2'yi bağlayan iletim kablosunun her bir ucunda gösterilmiştir.
+Aynı şekilde, ISO B2 ve ISO A3 aynı sinyaldir, part 2 ve part 3 arasında kablo gecikmesi ile gösterilmiştir. Wn-W0 bitleri 16-bit
+komut kodunu ve bir READ komutunun 16-bit PEC'ini temsil etmektedir. W0 bitinin sonunda 3 parça READ komutunu dekod eder ve SCK
+clock'unun bir sonraki yükselen kenarında geçerli olan datayı dışarıya kaydırmaya başlar. Xn-X0 bitleri parça 1 tarafından 
+dışarıya kaydırılan datayı temsil etmektedir. Yn-Y0 bitleri parça 3 tarafından dışarıya kaydırılan datayı temsil etmektedir. 
+Zn-Z0 bilteri ise parça 3 tarafından dışarıya kaydırılan datayı temsil etmektedir.  Bütün bu data daisy-chained bir biçim 
+içerisindeki parça 1'in SDO portundan geri okunur. 
+Seri Arayüzü Uyandırmak: Seri portlar (SPI yada isoSPI) tIDLE süresi boyunca Port A üzerinde aktivite olmazsa, düşük güçlü IDLE
+state'e geçmektedirler. WAKEUP devresi pin 41 ve 42 üzerindeki WAKEUP devresini görüntülemektedir.
+Eğer ISOMD = V- ise, Port A SPI moddadır. CSB yada SCK pini üzerindeki aktivite SPI arayüzünü uyandıracaktır. Eğer ISOMD = VREG 
+ise, Port A isoSPI moddadır. IPA-IMB üzerindeki diferansiyel aktivite isoSPI arayüzünü uyandırmaktadır. LTC6804, isoSPI durumu 
+tWAKE yada tREADY, Core duruma bağlı olarak (Şekil-1 ve durum tanımlarına bakınız) süresi içerisinde READY durumuna döndüğü 
+zaman haberleşme için hazır olacaktır. 
+Şekil-21 zamanlama ve denklik devresinin fonksiyonalitesini göstermektedir. Ortak (common) mod sinyaller seri arayüzü 
+uyandırmayacaktır. Arayüz uznu sinyal single-ended pulse, yada düşük-genlik simetrik puls aldıktan sonra uyanacak şekilde 
+tasarlanmıştır. Diferansiyel sinyal |SCK(IPA) - CSB(IMA)|, seri ara yüzü enerjilendirecek uyandırma sinyali olarak 
+nitelendirilebilmesi için en az tDWELL = 240ns süresince en azında VMAKE = 200mV seviyesinde olmalıdır.
+Bir Daisy Chain'i Uyandırma - Method 1: LTC6804-1 haberleşmek için hazır olduktan sonra PortB üzerinde bir Long+1 pulse'ı 
+göndermelidir. Bir daisy-chained konfigürasyonda, bu pulse yapıda bir sonraki cihazı uyandıracaktır, o da sırayla bir sonraki 
+cihazı uyandıracaktır. Eğer yapıda N cihaz varsa, bütün cihazlar Core duruma bağlı olarak N*tWAKE yada N*tREADY sürede 
+uyanacaktır. Büyük yapılar için N*tWAKE zamanı tIDLE'a eşit yada daha büyük olabilir. Bu durumda N*tWAKE süresinden daha uzun 
+süre bekledikten sonra host belki başka bir dummy byte gönderir ve bütün cihazların READY durumunda olduğuna emin olmak için
+N*tREADY süresince bekler. 
+Method 1 daisy chain'deki tüm cihazlar IDLE durumdayken kullanılabilir. Bu uyandırma sinyalinin daisy-chain boyunca yayılmasını 
+garantiler. Buna rağmen bu method daisy-chainin ortasındaki cihazlardan biri IDLE yerine READY durumunda olması halinde bütün cihazları 
+uyandıramaz. Bu olduğu zaman, READY durumdaki cihaz uyandırma sinyalini yayamaz, bundan dolayı cihazlar IDLE durumda kalır. 
+Bu durum yalznozca tIDLE kada zmaan sonra uyandırmaya uğraştığı takdirde gerçekleşebilir.
+Bir Daisy Chain'i Uyandırma - Metohd 2: Daha sağlam bir uyandırma methodu yerleşik bir uyandıra methoduna bağlı değildir, fakat
+manuel olarak bütün daisy-chaini uyandırmaya yetece süre kadar isoSPI trafiği gönderir. Her bir cihaz için en az bir çift uzun 
+isoSPI pulse'lara (-1 ve +1) her bir cihaz için ihtiyaç duyulmaktadır, ayrıca tREADY yada tWAKE'den daha uzun daha fazla (eğer
+core durum göreceli olarak STAMDBY yada SLEEP ise), fakat tIDLE'dan dah kısa süre. Bu her bir cihaza uyanması ve bir sonraki 
+pulse'ı müteakip cihaza yaymasına imkan vermektedir. Bu method chain içerisindeki bazı cihazlar IDLE durumda olmasa dair çalışır.
+Pratik olarak method 2'nin uygulanması uzun isoSPI pulse'larının yaratılması için CSB pininin toggle edilmesine (LTC6820'nin, 
+yada ISOMD = 0 iken LTC6804-1'in altı) ihtiyaç duymaktadır. Alternatig olarak, dummy komutlar(örneğin RDCFG) uzun isoSPI 
+pulse'larının  yaratılması için çalıştırılabilir.
+Datalink Katmanı: LTC6804 üzerindeki bütün data trabsferleri byte grupları içerisinde meydana gelir. Her byte 8 bitten oluşur. 
+Byte'lar MSB ilk iletilecek şekilde iletilir. CSB komut byte'ı ve sonraki data arasını içerecek şekilde komut seküensinin bütün
+süresi boyunca low olarak kalmalıdır. Bir write komutu üzerinde, data CSB'nin yükselen kenarı üzerinde latch edilmelidir.
+Network Katmanı: 
+
+
+
+
 
