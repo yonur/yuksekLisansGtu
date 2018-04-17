@@ -31,4 +31,38 @@ yapısı oluşturmasına bir örnektir. Dasiy chain'deki son(final) cihazın son
 yer alacaktır. Mikro işlemci PCB'si ile ilk LTC6804-1 PCB'si arasında 2-hat izolasyon sağlamak için LTC6820 IC'sini kullanınız.
 LTC6820 veriföyündeki şekil-16'daki diyagram ile işlevsel olarak denktir.
 LTC6804-2'nin ISOMD pinindeki duruma bağlı olarak 2-hat yada 4-hat olabilen tek bir single seri portu(Port A) vardır. 2-hat için 
-konfigğre edildiğinde, veriföyündeki şekil-17b'de gösterildiği gibi
+konfigüre edildiğinde, veriföyündeki şekil-17b'de gösterildiği gibi konfigüre edildiğinde bir kaç cihaz multi-drop konfigürasyonda 
+bağlanabilir. LTC6820 IC, MPU(master) ile LTC6804-2(slave) arasında arayüz olarak kullanilmaktadır.
+Tek bir LTC6804'ün Kullanılması: Yalnızca bir tane LTC6804 kullanılacağı zaman, LTC6804-2 önerilmektedir. isoSPI portB olmaz, 
+bundan dolayı daha az harici kompponente ihtiyaç duyar ve daha az enerji tüketir, özellikle PortA' nın 4-hat arayüz için 
+konfigüre edildiği durumda. 
+Buna rağmen, LTC6804-1, eğer ikinci isoSPI(port B) düzgün bir şekilde bayaslanır ve sonlandırılır ise şekil-18c'de görüldüğü gibi
+single(non-daisy chained) kullanılabilir. ICMP GND ile bağlanmamalıdır, fakat direk olarak IBIAS ile bağlanabilir. 
+Bir Bias direnci(2k ila 20k arasında) IBIAS için gereklidir. IBIAS'ı direk olarak VREG yada V-'ye bağlamayınız. Son olarak, IPB
+ve IMB 100ohm bir direnç ile sonlandırılmalıdır(VREG yada V-'ye bağlanmamalıdır).
+Bias Dirençlerin Seçimi: Ayarlanabilir sinyal genliği sisteme haberleşmenin sağlamlığı için güç tüketiminin takibi imkanını 
+sağlamaktadır, ve ayarlanabilir komparator eşiği sistemin sinyal kayıplarını dikkate almasını sağlamaktadır. 
+isoSPI transmitter IBIAS ve V- arasındaki gerilim bölücü(RBIAS = RB1 + RB2) ile eşiği belirlenen akım ve komparator voltajını 
+sürmektedir. Bölünen gerilim(VICMP) komparator eşiğini bu gerilimin yarısına ayarlayan ICMP pinine bağlanmaktadır. isoSPI 
+arayüzünün etkinleştirildiği(IDLE değil)nde IBIAS 2V'ta tutulduğu zaman, bir IB akımının IBIAS pininden dışarı akmasına sebep
+olur. IP ve IM pinleri 20*IB bir akım sürmektedir.
+Örnek olarak, RB1 direnci 2.8k ve RB2 direnci 1.21k ise (öyleyse RBIAS = 4k olur), böylece:
+  IB = 2v / (RB1 + RB2) = 0.5mA
+  IDRV = IIP = IIM = 20*IB = 10mA
+  VICMP = 2V * (RB2 / (RB1 + RB2)) = IB * RB2 = 603mV
+  VTCMP = 0.5*VICMP = 302mV
+Bu örnekte, pulse sürme akımı IDRV 10mA olacaktır, alıcı komparatörü +/-302mV'tan dah büyük IP-IM genlikleri tespit edecktir.
+Eğer izolasyon bariyeri twisted pair kablolar ile bağlı olan ve her bir ucunda 120ohm dirençlerle sonlandırılan 1:1 trafolar 
+kullanmaktadır, ve bunun sonrasında iletilen diferansiyel sinyal genliği (+/-) şu şekilde olacaktır:
+  VA = IDRV*RM/2 = 0.6V
+(Bu sonuçta genliği azaltma ihtimali olan, trafo ve kablo kayıpları ihmal edilmiştir).
+
+isoSPI pulse Detayları: İki LTC6804 cihaz diferansiyel pulsları izolasyon bariyeri boyunca ileri ve geri alarak ve göndererek 
+haberleşmektedirler. Transmiter üç gerilim seviyesinde: +VA, 0V ve -VA çıkış verebilmektedir. Pozitif bir çıkış RM direnç yükü 
+üzerinde IP sourcing akımı ve IM sinking akımı ile meydana gelmektedir. Negatif bir gerilim IP sinking ve IM sourcing ile 
+meydana gelmektedir. Her iki çıkış off olduğu zaman, yük direnci diferansiyel çıkışı 0V'a inmesi için zorlamaktadır.
+DC sinyal komponentlerini elemek ve güvenilirliği arttırmak için, isoSPI 2 farklı pulse uzunluğu kullanır. Bu tablo.21'de 
+gösterildiği gibi 4 tip pulse'a izin vermektedir. A + 1 pulse negatif pulse'ı izleyen pozitif bir pulse olarak iletilecektir.
+A - 1 pozitif pulse'ı izleyen negatif bir pulse olarak iletilecektir. Her bir pulse'ın uzunluğu t1/2PW olarak belirlenmiştir, 
+çünkü her biri simetrik çiftin yarısı kadardır.
+
