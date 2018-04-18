@@ -172,7 +172,12 @@ cihazlar komut byte'larını simültane olarak alırlar. Örneğin, cihaz yığ�
 tek bir ADCV komutu gnderilir, ve bütün cihazlar aynı anda dönüşüme başlar. Okuma ve yazma komutları için, tek bir komut 
 gönderilir, ve müteakipen yığın cihazları yığında data her bir cihaz üzerinden bir sonraki cihaza  kaydırıldığı için 
 efektif olarak kaskad shift register'a dönüştürülür. Seri programlama örneğine bakınız.
-Polling Methodu: 
+Polling Methodu: ADC'nin tamamlanması amacıyla mikrokontroller için tanımlanmış en basit methodADC dönüşümünü başlatıp sonucun
+okunması için gerekli önceden belirlenmiş süre kadar beklenir. Polling daisy-chain haberleşmede desteklenmez(LTC6804-1).
+Paralel konfigürasyonda SPI modda haberleşilir(ISOMD pin düşük seviyede bağlanır), iki polling methodu vardır. İlk method ADC 
+dönüşüm komutunu gönderdikten sonra CSB'yi düşük tutmaktadır. Dönüşüm komutunu gönderdikten sonra, cihaz busy performe ederek 
+dönüşüm yaparken SDO hattı düşük sürmektedir(Şekil 23). Cihaz dönüşümü tamamlandığı zaman SDO yüksek seviyede sürülür.
+
 
 
 
