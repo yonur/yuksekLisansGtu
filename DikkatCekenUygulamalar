@@ -176,8 +176,88 @@ Polling Methodu: ADC'nin tamamlanması amacıyla mikrokontroller için tanımlan
 okunması için gerekli önceden belirlenmiş süre kadar beklenir. Polling daisy-chain haberleşmede desteklenmez(LTC6804-1).
 Paralel konfigürasyonda SPI modda haberleşilir(ISOMD pin düşük seviyede bağlanır), iki polling methodu vardır. İlk method ADC 
 dönüşüm komutunu gönderdikten sonra CSB'yi düşük tutmaktadır. Dönüşüm komutunu gönderdikten sonra, cihaz busy performe ederek 
-dönüşüm yaparken SDO hattı düşük sürmektedir(Şekil 23). Cihaz dönüşümü tamamlandığı zaman SDO yüksek seviyede sürülür.
-
+dönüşüm yaparken SDO hattı düşük sürmektedir(Şekil 23). Cihaz dönüşümü tamamlandığı zaman SDO yüksek seviyede sürülür. Buna 
+rağmen, dönüşüm tamamlanmamış olsa da CSB yüksek seviyede sürülürse SDO'da yükselecektir.Bu methodun problemi kontrölör ADC 
+dönüşümün tamamlanmasını beklerken diğer işlerle uğraşamaz. 
+Bir sonraki method ise bu sorunun üstesinden gelmektedir. Kontrolör bir ADC dönüşüm başlama komutu yollayabilir, diğer görevleri
+icra edebilir, sonrasında ADC dönüşümlerinin durumunu öğrenmek için poll ADC dönüşüm durum(PLADC) komutunu yollar(şekil-24).
+PLADC komutunu girdikten sonra eğer cihaz meşgul olarak dönüşüm durumu icra ediyorsa SDO düşük seviyeye geçecektir. Buna rağmen,
+dönüşüm tamamlanmamış olsa da CSB yükseldiğinde SDO da yükselecektir. Paralel konfigürasyondaki cihazlarda PLADC komutunun nasıl
+kullanıldığı programlama örneklerinde gösterilmiştir.
+isoSPI modda haberleşen paralel konfigürasyonlarda düşük taraftaki port sadece alınan master isoSPI pulsına cevaben bir data
+pulsı iletir. Bundan dolayı, yukarıda tanımlanan polling mmethodlarından biri için gönderilen adres komutunu müteakipen isoSPI data
+palsı dönüşüm durumunu güncellemek için parçaya yollanır. Bu palslar LTC6820 kullanarak basit bir şekilde SCK pinini anahtarlamak için
+gönderilebilir. Bu palsa cevaben eğer hala meşgul olarak dönüşüm icra ediliyorsa LTC6804-2 bir isoSPI palsı geri döndürür ve eğer 
+dönüşüm tamamlandıysa bir pals geri döndürmez.  Eğer bir CSB yüksek SPI palsı LTC6804-2'ye gönderilirse polling komuttan çıkar.
+Dikkat edilmelidir ki poll komutları paralel isoSPI ile uyumlu değildir.
+Bus Protokolleri: 
+Protokol Format: Tablo 27 ila 31 arasında broadcast komutları için protokol formatları gösterilmiştir. Tablo 26 protokol diyagramının 
+okunması için anahtardır.
+Komut Formatı: Sırasıyla tablo 32 ve tablo 33'te broadcast ve adres komutlarının formatları gösterilmiştir. 11-bit komut kodu
+CC[10:0] broadcast yada adres komutu için aynıdır. Bütün komut kodlarının bir listesi tablo.34'te verilmiştir. Bir broadcast komutu
+CMD0[7] ila CMD0[3] arası için bir 0 değerine sahiptir. Bir adres komutunun CMD0[7]'si birdir müteakip CMD0[6:3] arasındaki 4-bit ise
+adrestir(a3,a2,a1,a0). Bir adreslenmiş cihazın A3 ila A0 pinleri arasındaki fiziksel adresi adres komutundaki adres ile eşleşir ise 
+cihaz bu adres komutuna cevap verir. Broadcast ve adres komutlarının PEC'i bütün 16-bit komut (CMD0 ve CMD1) üzerinde hesaplanmaldır.
+Komutlar: Tablo 34 LTC6804-1 ve LTC6804-2'nin her ikisi için bütün komutlar ve onların opsiyonlarını listelemiştir (CMD0 ve CMD1)
+Programlama Örnekleri: Aşağıdaki örnekte S1,S2,S3 olarak isimlendirilmiş üç adet LTC6804-1 yığın olan bir konfigürasyon için müteakip
+örnekler verilmiştir. S1 cihazı üzerindeki portA SPI modda konfigüre edilmiştir(ISOMD pini düşük seviye). S2 ve S3 cihazlarındaki 
+port A isoSPI modda konfigüre edilmiştir(ISOMD pini düşük seviyede). S1 üzerindeki port B S2 üzerindeki port A'ya bağlanmıştır. S2
+üzerindeki port B S3 üzerindeki port A'ya gidiyor. Mikrokontroller yığın ile S1 üzerindeki port A ile heberleşmektedir.
+Seri Arayüzün Uyandırılması: 
+1- Bir dummy byte gönderilir. CSB ve SCK üzerindeki aktivite  S1 üzerindeki seri arayüzü uyandıracaktır. 
+2- S1, S2 ve S3 cihazlarının hepsini enerjilendirmek için 3*tWAKE süresi kadar beklenir.
+Büyük yığınlarda cihazların bazıları uyandıktan sonra IDLE duruma geçebilir, adım 3 ve 4'ü uygulayınız:
+3- İkinci dummy byte gönderilir
+4- 3*tREADY süresince beklenir
+5- Komutlar gönderilir.
+Konfigürasyon Regiterlarına Yazma: 
+1- CSB düşük seviyeye çekilir
+2- WRCFG komutu (0x00 0x01) ve onun PEC (0x3D 0x6E) gönderilir
+3- S3 cihazının CFGR0 byte'ı, daha sonrasında CFGR1(S3),...CFGR5(S3), CFGR0(S3) ten CFGR5(S3) e kadar olanların PEC değeri gönderilir.
+4- S2 cihazının CFGR0 byte'ı, daha sonrasında CFGR1(S2),...CFGR5(S2), CFGR0(S2) ten CFGR5(S2) e kadar olanların PEC değeri gönderilir.
+5- S1 cihazının CFGR0 byte'ı, daha sonrasında CFGR1(S1),...CFGR5(S2), CFGR0(S1) ten CFGR5(S1) e kadar olanların PEC değeri gönderilir.
+6- CSB yüksek seviyeye çekilir, CSB'nin yükselen kenarında bütün cihazlarda data latch edilir.
+Yukarıdaki seküens için seri ara yüz zamanının hesaplanması şu şekilde olur:
+Daisy chain stack'i içierisndeki LTC6804-1'lerin sayısı = n
+Seküens içerisindeki byteların sayısı(B):
+Komut: 2 (Komut byte sayısı) + 2 (PEC byte sayısı) = 4
+Data: Her bir LTC6804 için 6 (Data byte sayısı) + 2 (Data PEC byte sayısı) = her bir cihaz için 8 byte
+B = 4 + 8*n
+Her bir bit için seri port frekansı = F
+Zaman = (1/F) * B * 8bit/byte = (1/F) * [4 + 8*n] * 8
+Daha önce verilen 3 LTC6804'lü örnek için zaman, 1MHz seri port ile = (1/1e6)*(4+8*3) = 224uS
+Not: Bu zaman bütün yazma ve okuma komutları için aynıdır.
+Batarya hücresi Register Grup A'nın Okunması: 
+1- CSB düşük seivyeye çekilir
+2- RDCA komutu(0x00 0x04) ve onun PEC(0x07 0xC2) gönderilir
+3- S1 cihazının CVAR0 byte'ı, sonrasında CVAR1(S1),...CVAR5(S1), CVAR0(S1) den CVAR5(S1)'e kadar olanların PEC'i okunur.
+4- S2 cihazının CVAR0 byte'ı, sonrasında CVAR1(S2),...CVAR5(S1), CVAR0(S2) den CVAR5(S2)'e kadar olanların PEC'i okunur.
+5- S3 cihazının CVAR0 byte'ı, sonrasında CVAR1(S3),...CVAR5(S3), CVAR0(S3) den CVAR5(S3)'e kadar olanların PEC'i okunur.
+6- CSB yüksek seviyeye çekilir.
+Batarya Hücresi Voltajı ADC Dönüşümüne Başlanması:
+(Bütün hücreler, müsade edilen deşaj ile birlikte normal modda) ve poll durumunda
+1- CSB düşük seviyeye çekilir
+2- ADCV komutu MD[1:0] = 10 ve DCP = 1 v.b. 0x03 0x70 ve onun PEC(0xAF 0x42)i gönderilir.
+3- CSB yükseğe çekilir
+Batarya Hücresi Voltaj Registerlarının Temizlenmesi 
+1- CSB düşük seviyeye çekilir
+2- CLRCELL komutu (0x07 0x11) ve onun PEC(0xC9 0xC0) gönderilir
+3- CSB yüksek seviyeye çekilir
+ADC Durumunun Poll Edilmesi:
+(Paralel konfigürasyon ve ISOMD = 0)
+Bu örnek LTC6804-2'i A[3:0] = 0011 ve ISOMD = 0 ile adreslenmiş olarak kullanmaktadır.
+1- CSB düşük seviyeye çekilir
+2- PLADC komutu (0x9F 0x14) ve onun PEC(0x1C 0x48) gönderilir
+3- SDO çıkışı eğer LTC6804-2 meşgul ise düşük seviyeye çekilir. Hostun adreslenmiş cihazdan polling durumunun güncellenebilmesi için
+SCK'dan clock göndermesi gerekmektedir.
+4- LTC6804-2 dönüşümü tamamladığında yüksek seviyede çıkışını vermesi gerekmektedir.
+5- Polling'ten çıkılması için CSB yüksek seviyeye çekilmelidir.
+LTC6804'e Bağlı Olan I2C Slave ile Konuşulması:
+LTC6804 I2C slave cihazların GPIO4(SDA) ve GPIO5(SCL) pinlerine bağlanarak kullanılmasını desteklemektedir.
+Şekil 25'de görüldüğü gibi bağlanarak küçük seri bir EEPROM'un içine ürün kalibrasyon sabitleri ve diğer bilgilerin depolanması
+imkanı kayda değer bir kullanımdır.
+Bu örnekte ...
+LTC6804'e bağlanılan SPI Slave ile Konuşulması:...
 
 
 
