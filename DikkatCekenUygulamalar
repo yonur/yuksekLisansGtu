@@ -121,7 +121,58 @@ Datalink Katmanı: LTC6804 üzerindeki bütün data trabsferleri byte grupları 
 Byte'lar MSB ilk iletilecek şekilde iletilir. CSB komut byte'ı ve sonraki data arasını içerecek şekilde komut seküensinin bütün
 süresi boyunca low olarak kalmalıdır. Bir write komutu üzerinde, data CSB'nin yükselen kenarı üzerinde latch edilmelidir.
 Network Katmanı: 
+Paket Eror Kodu: Paket eror kodu (PEC) ilk PEC tohum değeri 000000000010000 ve x15 + x14 + x10 + x8 + x7 +
+x4 + x3 + 1 karakteristik polinomunu kullanarak bir reister gruptaki gönderildiği sırada bütün bitler için hesaplanan bir 15-bit
+cyclic redundancy kontrol değeridir.  15-bit PEC değerini hesaplamak için, basit bir prosedür belirlenmiştir:
+1- PEC'i 000000000010000 ile ilklendir (PEC 15 bit bir register gruptur)
+2- Her bir bit için PEC register gruba DIN gelmekte, ayarlanma şu şekildedir
+  IN0  = DIN XOR PEC[14]
+  IN3  = IN0 XOR PEC[2]
+  IN4  = IN0 XOR PEC[3]
+  IN7  = IN0 XOR PEC[6]
+  IN8  = IN0 XOR PEC[7]
+  IN10 = IN0 XOR PEC[9]
+  IN14 = IN0 XOR PEC[13]
+3- 15-bit PEC aşağıdaki gibi güncellenir
+  PEC[14] = IN14,
+  PEC [13] = PEC [12],
+  PEC [12] = PEC [11],
+  PEC [11] = PEC [10],
+  PEC [10] = IN10,
+  PEC [9] = PEC [8],
+  PEC [8] = IN8,
+  PEC [7] = IN7,
+  PEC [6] = PEC [5],
+  PEC [5] = PEC [4],
+  PEC [4] = IN4,
+  PEC [3] = IN3,
+  PEC [2] = PEC [1],
+  PEC [1] = PEC [0],
+  PEC [0] = IN0
+4- Bütün data shift edilene kadar step 2'ye geri dönün. Final PEC(16 bits) PEC register içerisindeki 15-bit değere LSB tarafın 0 
+biti eklenmesi ile oluştırulur.
+Şekil-22 yukarıda tanımlanan algoritmayı göstermektedir. PEC'in 16-bit word (0x0001) için hesaplanmasına dair bir örnek tablo-24
+te verilmiştir. 0x001 için PEC LSB'sini 0 ile doldurduktan sonra 0x3D6E olarak hesaplanmaktadır. Daha uzun dta streamleri için,
+PEC, PEC registerına gönderilen datanın son bitinin sonunda geçerlidir.
+LTC6804 PEC'i alınan her hangi bir komut yada data için hesaplar ve onu müteakip komut yada datanın PEC'i ile karşılaştırır.
+.......
 
+Adress Komutları: Bir adres komutu bus üzerindeki sadece adreslenen cihazın cevap verdiği bir komuttur. Adres komutları yalnızca 
+LTC6804-2 parçaları ile kullanılır. Bütün komutlar adresleme ile uyumludur. Adres komut formatı için bus protokollerine bakınız.
+Broadcast Komutları(LTC6804-1 yada LTC6804-2): Bir broadcat komutu bus üzerindeki bütün cihazların adresine bakmaksızın cevap 
+verdiği bir komuttur. Bu komut formatı LTC6804-1 ve LTC6804-2 için kullanılabşlmektedir. Broadcast komut formatı için Bus 
+Protokollerine bakınız. Broadcast komutları ile bütün cihazlar komutları simültane olarak gönderebilmektedir.
+Paralel konfigürasyonda (LTC6804-2), broadcast komutları ADC dönüşümleri ilklendirmek için yada bütün parçalara aynı data 
+yazılıyor olduğunda yazma komutlarını göndermek için idealdir. polling fonksiyonu (ADC komutlarının sonunda otomatik, yada PLADC
+komutnun manuel olarak kullanılması) broadcast komutları ile birlikte kullanılır, fakat sadece paralel SPI arayüzleri ile.
+Polling paralel isoSPI ile uyumlu değildir.  Benzer şekilde, broadcast okuma komutları paralel konfigürasyonda kullanılmamalıdır
+(ya SPI yada isoSPI).
+Daisy-chained(LTC6804-1) konfigürasyonlar sadece broadcast komutları destekler, çünkü adreslemeleri yoktur. Chain'deki bütün 
+cihazlar komut byte'larını simültane olarak alırlar. Örneğin, cihaz yığını içerisinde ADC dönüşümlerini ilklendirmek için 
+tek bir ADCV komutu gnderilir, ve bütün cihazlar aynı anda dönüşüme başlar. Okuma ve yazma komutları için, tek bir komut 
+gönderilir, ve müteakipen yığın cihazları yığında data her bir cihaz üzerinden bir sonraki cihaza  kaydırıldığı için 
+efektif olarak kaskad shift register'a dönüştürülür. Seri programlama örneğine bakınız.
+Polling Methodu: 
 
 
 
