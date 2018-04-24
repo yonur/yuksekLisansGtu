@@ -1,0 +1,15 @@
+ÇALIŞMASI:
+Çok hücreli batarya hücre dengeleyicisidir. Gerilim seviyesi yüksek ve düşük olan bataryaların arasında gerekli dengelemeyi sağlar.
+Yüksek akım transferleri olduğu için kesin gerilim seviyelerini görüntülemek için LTC6803-1 gibi batarya görüntüleme sistemlerine
+ihtiyaç duyulmaktadır.
+En sonda bir Mikrokontrolör yada Mikroişlemci gelen sıcaklık, akım ve gerilim değerlerini değerlendirerek gerekli dengeleme 
+algoritmasını uygular.
+Her durum için tek bir ideal algoritma yok. LTC3300-1 her bir hüvre için ayrı dengeleyicinin aynı anda ve çift yönlü dengeleme 
+uygulamasını sağlayarak esneklik sağlamaktadır.
+Tek Yönlü ve İki Yönlü Dengeleme:
+Tek yönlü dengelemede sadece deşarj vardır. Yani sadece yüksek gerilimli batarya deşarj edilerek seviyesi gerekli seviyeye 
+indirilir. Bu uygulama sadece bir kaç batarya yüksek gerilimli ise mantıklı olabilir. Fakat sadece bir kaç bataryanın düşük gerilimli olduğu durum için 
+mantıklı değildir. LTC330-1'in iki yönlü aktif dengelem methodu ile minimum zamanda maksimum şarj tasarrufu bütün yaygın batarya 
+hücre kapasite hataları için gereksinim karşılamaktadır.
+Senkronize Flyback Dengeleyicisi:
+
