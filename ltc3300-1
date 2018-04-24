@@ -12,4 +12,6 @@ indirilir. Bu uygulama sadece bir kaç batarya yüksek gerilimli ise mantıklı 
 mantıklı değildir. LTC330-1'in iki yönlü aktif dengelem methodu ile minimum zamanda maksimum şarj tasarrufu bütün yaygın batarya 
 hücre kapasite hataları için gereksinim karşılamaktadır.
 Senkronize Flyback Dengeleyicisi:
-
+LTC3300-1 tarafından uygulanan dengeleme mimarisi çift yönlü senkronize flyback'tir. Her bir LTC3300-1'in içerdiği 6 adet senkron flyback 
+kontrölör direk olarak bTry HÜCRELERİNİ BİRBİRİİNDEN ayrı olarak şarj ve deşarj etme imkanı sağlar. Her bir dengeleyici birbirinden 
+bağımsız olarak çalışarak birbirinden ayrı batarya hücreleri ve komşu büyük batarya grupları arasında iki yönlü şarj imkanı sağlamaktadır.
