@@ -16,3 +16,7 @@ Avantajlar:
 
 
 Dezavantajlar:
+-LTC6804 entegresi 0 ila 5V arasındaki batarya gerilim değerlerini ölçebilmektedir.
+-LTC6804 0 ila 5V arasındaki analog değerleri ölçmek için 5 adet GPIO pinini kullanmaktadır.
+-GPIO1 ve GPIO2 pinlerine HC-LSP-25A akım sensörü bağlanarak akım değerleri ölçülür.
+
