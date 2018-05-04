@@ -8,15 +8,31 @@ Avantajlar:
   dengeleme komutu yollaması ve LTC3300 bataryalar arasında dengelemyi icra etmektedir.
   -Ortalama SOC ile her bir batarya için SOC değerleri farkları karşılaştırılır ve eşik değeri(LTC3300 için bu 2V olması lazım)ni
   aştıysa LTC3300'e dengeleme komutunu yollanacaktır. Dengeleme durumu fark eşik değerinin altına inene kadar devam edecrktir.
-  -
-
+  -Akım ölçümü için uygun bir Holzer akım sensörü kullanılabilir.
+  -LTC6804 entegresi 0 ila 5V arasındaki batarya gerilim değerlerini ölçebilmektedir.
+  -LTC6804 0 ila 5V arasındaki analog değerleri ölçmek için 5 adet GPIO pinini kullanmaktadır.
+  -GPIO1 ve GPIO2 pinlerine HC-LSP-25A akım sensörü bağlanarak akım değerleri ölçülür.
+  -Sıcaklık ölçümü için LTC1380 analog multiplexer ve TL431 sıcaklık sensörü kullanılabilir. 4 adet LTC1380 ile 64 farklı sıcaklık 
+  ölçümü yapılabilir. LTC1380 ile SMBus ile haberleşilmektedir. LTC1380 sıcaklık değerini LTC6804'e basacak ve LTC6804 üzerinden 
+  sıcaklık değeri mikrokontrolöre basılabilir.
+  -LTC3300 dengeleme işlemini iki yönlü senkronize flyback yapısı ile icra etmektedir. Her bir LTC3300 ile 6'ya kadar batarya 
+  hücresi dengelenebilmektedir. Flyback trafolar iki yönlü dengeleme kullanmayı düşünüyorum.
+  -Trafolaron primary tarafı her bir trafoya paralel, secondary tarafı ise bütün batarya grubuna paralel bağlanmıştır.
+  (Hatırladığım kadarıyla deşarj olayında hangi batarya deşarj edilecekse o bataryanın bağlı olduğu CMOS açılıyor ve istenilen 
+  peak akımına erişene kadar flyback trafonun primary sargısına akım akıyor. Peak değerine ulaşınca primary CMOS kapatılıyor ve 
+  primary tarafta biriken enerji secondary tarafa akıyor ve kayıbı daha da azaltmak için secondary taraftaki CMOS açılıyor.
+  Secondary taraftaki akım sıfır değerine düşünce secondary taraftaki CMOS kapatılıyor ve primary taraftaki CMOS açılıyor ve 
+  yukarıdaki döngü tekrar ediyor. Şarj olayında ise bunun ters i olarak şarj edilecek bataryanın secondary tarafondaki CMOS
+  anahtar açılıyor ve ilgili fluyback trafonun secondary tarafında istenilen(programlanmış) akım değerine ulaşana kadar akım 
+  akıtılıyor. Bu peak akım değerine ulaşılınca secondary taraftaki trafo kapatılıyor. Enerji trafonun primary tarafına akıyor ve
+  primary taraftaki akım değeri sıfıra düşene kadar primary tarafın trafosu açık tutuluyor. Bu döngü tekrar ediyor. Burada 
+  flyback trafonun kullanılmasının sebebi bu enerji transferlerinin az kayıp ile gerçekleşmesini sağlamasıdır.
+  
 
 
 
 
 
 Dezavantajlar:
--LTC6804 entegresi 0 ila 5V arasındaki batarya gerilim değerlerini ölçebilmektedir.
--LTC6804 0 ila 5V arasındaki analog değerleri ölçmek için 5 adet GPIO pinini kullanmaktadır.
--GPIO1 ve GPIO2 pinlerine HC-LSP-25A akım sensörü bağlanarak akım değerleri ölçülür.
+
 
