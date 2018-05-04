@@ -1,3 +1,18 @@
 Avantajlar:
+  LTC3300:
+  -Hızlı eşitleme
+  -Yüksek Enerji Etkinliği
+  -Kolaylıkla modülerleştirilebilmesi
+  -Kolaylıkla bataryalar arasındaki farkları uyumlamak
+  -Mikrokontroller gerilim,akım ve sıcaklık değerlerine göre dengesizlik durumunu belirledikten sonra tek yapması gereken LTC3300'e
+  dengeleme komutu yollaması ve LTC3300 bataryalar arasında dengelemyi icra etmektedir.
+  -Ortalama SOC ile her bir batarya için SOC değerleri farkları karşılaştırılır ve eşik değeri(LTC3300 için bu 2V olması lazım)ni
+  aştıysa LTC3300'e dengeleme komutunu yollanacaktır. Dengeleme durumu fark eşik değerinin altına inene kadar devam edecrktir.
+  -
+
+
+
+
+
 
 Dezavantajlar:
