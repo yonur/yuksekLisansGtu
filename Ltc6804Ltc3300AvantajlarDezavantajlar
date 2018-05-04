@@ -28,6 +28,7 @@ Avantajlar:
   primary taraftaki akım değeri sıfıra düşene kadar primary tarafın trafosu açık tutuluyor. Bu döngü tekrar ediyor. Burada 
   flyback trafonun kullanılmasının sebebi bu enerji transferlerinin az kayıp ile gerçekleşmesini sağlamasıdır.
   
+  
 
 
 
