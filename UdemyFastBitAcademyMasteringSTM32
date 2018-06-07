@@ -239,11 +239,24 @@ void hal_spi_slave_rx(spi_handle_t *spi_handle, uint8_t *rcv_buffer, uint32_t le
   * @retval none
   */
 void hal_spi_irq_handler(spi_handle_t *hspi);
+
+
+void hal_spi_handle_tx_interrupt(spi_handle_t *hspi);
+
+void hal_spi_handle_rx_interrupt(spi_handle_t *hspi);
+
+void hal_spi_tx_close_interrupt(spi_handle_t *hspi);
+
+void hal_spi_close_rx_interrupt(spi_handle_t *hspi);
+
+uint8_t hal_spi_is_bus_busy(SPI_TypeDef *SPIx);
+
 #endif
+
 //----------------------------------------------hal_spi_driver.c-------------------------------------------------------//
 #include "hal_spi_driver.h"
 
-//Özet: Bu method microkontrolörün master mi yoksa slave modda mi calisacagini belirler.
+//+Özet: Bu method microkontrolörün master mi yoksa slave modda mi calisacagini belirler.
 //Parametreler: SPIx SPI'in bas adresidir. master parametresi ise 1 oldugu takdirde mikrokontrolör mastir olarak aksi halda slave 
 //olarak set edilir.
 //Geri dönüs degeri: Yoktur.
@@ -251,11 +264,11 @@ static void hal_spi_configure_device_mode(SPI_TypeDef *SPIx, uint32_t master) {
 	if(master) {
 		SPIx->CR1 |= SPI_REG_CR1_MSTR;	
 	} else {
-		SPIx->CR1 &= ~(SPI_REG_CR1_MSTR);
+		SPIx->CR1 &= ~SPI_REG_CR1_MSTR;
 	}
 }
 
-//Özet: SPI muhaberesinde faz ve polarite degerlerinin set edilmesi için.
+//+Özet: SPI muhaberesinde faz ve polarite degerlerinin set edilmesi için.
 //Parametreler: SPIx SPI'in base adresidir. Ayrica fazin ve polaritenin mod durumlari için 1 yada sifir edilmesi saglanmaktadir.
 //Geri dönüs degeri: Yoktur.
 static void hal_spi_configure_phase_and_polarity(SPI_TypeDef *SPIx, uint32_t phase_value, uint32_t polarity_value) {
@@ -269,30 +282,30 @@ static void hal_spi_configure_phase_and_polarity(SPI_TypeDef *SPIx, uint32_t pha
 	if(phase_value) {
 		SPIx->CR1 |= SPI_REG_CR1_CPHA;
 	} else {
-		SPIx->CR1 &= ~(SPI_REG_CR1_CPHA);
+		SPIx->CR1 &= ~SPI_REG_CR1_CPHA;
 	}
 	
 }
 
-//Özet: data formatinin boyutu ve data yönü lsb mi yoksa msb mi olacaginin belrlendigi method.
+//+Özet: data formatinin boyutu ve data yönü lsb mi yoksa msb mi olacaginin belrlendigi method.
 //Parametreler: SPIx SPI'in base adresidir. Ayrica data formatinin boyutu ve yönünün belirlendigi parametreleri içermektedir.
 //Geri gönüs degeri yok.
-static void hal_spi_configure_datasize_direction(SPI_TypeDef *SPIx, uint32_t datasize_16, uint32_t direction_lsbfirst) {
+static void hal_spi_configure_datasize(SPI_TypeDef *SPIx, uint32_t datasize_16, uint32_t direction_lsbfirst) {
 	if(datasize_16) {
-		SPIx->CR1 |= SPI_16_BIT_DF_ENABLE;
+		SPIx->CR1 |= SPI_REG_CR1_DFF;
 	} else {
-		SPIx->CR1 &= ~(SPI_16_BIT_DF_ENABLE);
+		SPIx->CR1 &= ~SPI_REG_CR1_DFF;
 	}
 	
 	if(direction_lsbfirst) {
 		SPIx->CR1 |= SPI_CR1_LSBFIRST;
 	} else {
-		SPIx->CR1 &= ~(SPI_CR1_LSBFIRST);
+		SPIx->CR1 &= ~SPI_CR1_LSBFIRST;
 	}
 
 }
 
-//Özet: Master için NSS pininin kullanimi.
+//+Özet: Master için NSS pininin kullanimi.
 //Parametreler: SPIx SPI'in base adresidir. Ayrica software mi yoksa hardware management mi yapilacaginin belirlenmesi için 
 //ssm_enable parametresi kullanilmistir.
 static void hal_spi_configure_nss_master(SPI_TypeDef *SPIx, uint32_t ssm_enable) {
@@ -306,7 +319,7 @@ static void hal_spi_configure_nss_master(SPI_TypeDef *SPIx, uint32_t ssm_enable)
 		
 }
 
-//Özet: Slave için NSS pininin kullanimi.
+//+Özet: Slave için NSS pininin kullanimi.
 //Parametreler: SPIx SPI'in base adresidir. Ayrica software mi yoksa hardware management mi yapilacaginin belirlenmesi için 
 //ssm_enable parametresi kullanilmistir.
 //Geri dönüs degeri yoktur.
@@ -318,7 +331,17 @@ static void hal_spi_configure_nss_slave(SPI_TypeDef *SPIx, uint32_t ssm_enable) 
 	}
 }
 
-//Özet: SPI'in aktiflestirilmesi için kullanilan method.
+//+Özet:  SPI haberlesmesindeki baud rate'in belirlendigi method. SPI CR1 registerinin 3 ve 5.nci bitleri arasindaki alan 
+//ile belirlenir. 7'den büyük bir sayi girilirse varsayilanda 0 yani /2 kullanilir.
+void hal_spi_configure_baudrate(SPI_TypeDef *SPIx, uint32_t pre_scalar_value)
+{
+        if(pre_scalar_value > 7 )
+            SPIx->CR1 |= (0x00 << 3); //if pre_scalar_value > 7,then use default . that is 0
+        else
+            SPIx->CR1 |= (pre_scalar_value << 3);
+}
+
+//+Özet: SPI'in aktiflestirilmesi için kullanilan method.
 //Parametreler: SPIx SPI'in base adresidir. 
 //Geri dönüs degeri: Yoktur.
 static void hal_spi_enable(SPI_TypeDef *SPIx) {
@@ -329,7 +352,7 @@ static void hal_spi_enable(SPI_TypeDef *SPIx) {
 	
 }
 
-//Özet: SPI'in deaktiflestiilmesi için kullanilan method.
+//+Özet: SPI'in deaktiflestiilmesi için kullanilan method.
 //Parametreler: SPIx SPI'in base adresidir. 
 //Geri dönüs degeri: Yoktur.
 static void hal_spi_disable(SPI_TypeDef *SPIx) {
@@ -338,55 +361,81 @@ static void hal_spi_disable(SPI_TypeDef *SPIx) {
 	
 }
 
+//+Özet: Eger direction parametresi 0'dan farkli bir deger girilirse 1 hat iki yönlü iletim, 0 girilirse cift haft tek yön SPI 
+//haberlesmesi olacak demektir.
+void hal_spi_configure_direction(SPI_TypeDef *SPIx, uint32_t direction ) {
+	
+		if(direction )
+	{
+		SPIx->CR1 |= SPI_REG_CR1_BIDIMODE; 
+	}else
+	{
+		SPIx->CR1 &= ~SPI_REG_CR1_BIDIMODE; 
+	}
+	
+}
+
+
+//+Özet: Tx buffer bos interruptini aktiflestiriliyor.
 void hal_spi_enable_txe_interrupt(SPI_TypeDef *SPIx) {
 	
 		SPIx->CR2 |= SPI_REG_CR2_TXEIE_ENABLE;
 
 }
 
+//+Özet: Tx buffer bos interruptini deaktiflestiriliyor.
 void hal_spi_disable_txe_interrupt(SPI_TypeDef *SPIx) {
 	
 	SPIx->CR2 &= ~SPI_REG_CR2_TXEIE_ENABLE;
 	
 }
 
+//+Özet: RX buffer non empty bufferini aktiflestiriyor.
 void hal_spi_enable_rxne_interrupt(SPI_TypeDef *SPIx) {
 	
 	SPIx->CR2 |= SPI_REG_CR2_RXNEIE_ENABLE;
 	
 }
 
+//+Özet: RX buffer non empty bufferini deaktiflestiriyor.
+void hal_spi_disable_rxne_interrupt(SPI_TypeDef *SPIx) {
+	SPIx->CR2 &= ~SPI_REG_CR2_RXNEIE_ENABLE;
+}
+
+//+Özet: Master veri tranmisyonu için kullanilan method.
 void hal_spi_master_tx(spi_handle_t *spi_handle,uint8_t *buffer, uint32_t len) {
 	
 	spi_handle->pTxBuffPtr = buffer;
 	spi_handle->TxXferCount = len;
 	spi_handle->TxXferSize = len;
 	
+	spi_handle->RxXferCount = 0;
+	spi_handle->RxXferSize = 0 ;
+	
 	spi_handle->State = HAL_SPI_STATE_BUSY_TX;
 	
-	hal_spi_enable(spi_handle->Instance);
 	hal_spi_enable_txe_interrupt(spi_handle->Instance);
-	
+	hal_spi_enable(spi_handle->Instance);	
 }
 
-void hal_spi_master_rx(spi_handle_t *spi_handle,uint8_t *buffer, uint32_t len) {
+//+Özet: Master veri alisi için kullanilan method.
+uint8_t dummu_tx[2]={0};
+void hal_spi_master_rx(spi_handle_t *spi_handle,uint8_t *rx_buffer, uint32_t len) {
 	
 	uint32_t i = 0, val;
 	
 	//Master okuma yapmasi için clock yaratmasi gerek. Bu sebeple okuyacagi kadar uzunlukta veriyi slave'e dummy de olsa 
 	//göndermesi gerekiyor.
-	spi_handle->pTxBuffPtr = buffer;
+	spi_handle->pTxBuffPtr = dummu_tx;
 	spi_handle->TxXferSize = len;
 	spi_handle->TxXferCount = len;
 	
 	//Master simdi okuma için dolduruyor rxbufferi.
-	spi_handle->pRxBuffPtr = buffer;
+	spi_handle->pRxBuffPtr = rx_buffer;
 	spi_handle->RxXferCount = len;
 	spi_handle->RxXferSize = len;
 	
 	spi_handle->State = HAL_SPI_STATE_BUSY_RX;
-	
-	hal_spi_enable(spi_handle->Instance);
 	
 	//RXNE interrupt aktiflestirilmeden önce data registeri okuyarak rx bufferin bos oldugundan emin oluruz.
 	val = spi_handle->Instance->DR;
@@ -394,29 +443,35 @@ void hal_spi_master_rx(spi_handle_t *spi_handle,uint8_t *buffer, uint32_t len) {
 	hal_spi_enable_rxne_interrupt(spi_handle->Instance);
 	hal_spi_enable_txe_interrupt(spi_handle->Instance);
 	
+	hal_spi_enable(spi_handle->Instance);
+	
 }
 
-void hal_spi_slave_tx(spi_handle_t *spi_handle, uint8_t *rcv_buffer, uint32_t len) {
+//+Özet: Slave veri transferi için kullanilan method.
+uint8_t dummy_rx[10]={0};
+void hal_spi_slave_tx(spi_handle_t *spi_handle, uint8_t *tx_buffer, uint32_t len) {
 	
 	//Master clok üretmeden önce slave'in tx bufferinda gönderecegi data hazir olmalidir
-	spi_handle->pTxBuffPtr = rcv_buffer;
+	spi_handle->pTxBuffPtr = tx_buffer;
 	spi_handle->TxXferCount = len;
 	spi_handle->TxXferSize = len;
 	
-	//Burada masterin okuma yapilmasi için clokc üetebilmesi için gçmderilen dummy buffer verisi aliniyor.
-	spi_handle->pRxBuffPtr = rcv_buffer;
+	//Burada masterin okuma yapilmasi için clock üetebilmesi için gömderilen dummy buffer verisi aliniyor. pRxBuffPtr tekrar 
+	//kullanilabilir.
+	spi_handle->pRxBuffPtr = dummu_tx;
 	spi_handle->RxXferCount = len;
 	spi_handle->RxXferSize = len;
 	
 	spi_handle->State = HAL_SPI_STATE_BUSY_TX;
 	
-	hal_spi_enable(spi_handle->Instance);
-	
 	hal_spi_enable_rxne_interrupt(spi_handle->Instance);
 	hal_spi_enable_txe_interrupt(spi_handle->Instance);
 	
+	hal_spi_enable(spi_handle->Instance);
+	
 }
 
+//+Özet: Slave veri alisi için kullanilan method.
 void hal_spi_slave_rx(spi_handle_t *spi_handle, uint8_t *rcv_buffer, uint32_t len) {
 	spi_handle->pRxBuffPtr = rcv_buffer;
 	spi_handle->RxXferCount = len;
@@ -424,8 +479,127 @@ void hal_spi_slave_rx(spi_handle_t *spi_handle, uint8_t *rcv_buffer, uint32_t le
 	
 	spi_handle->State = HAL_SPI_STATE_BUSY_RX;
 	
-	hal_spi_enable(spi_handle->Instance);
 	hal_spi_enable_rxne_interrupt(spi_handle->Instance);
+	hal_spi_enable(spi_handle->Instance);
+	
+}
+
+//+Özet: SPI interrupt istemini(request) tutar(handle).  
+void hal_spi_irq_handler(spi_handle_t *hspi) {
+	uint32_t tmp1 = 0, tmp2 = 0;
+	
+	tmp1 = (hspi->Instance->SR & SPI_REG_SR_RXNE_FLAG);
+	tmp2 = (hspi->Instance->CR2 & SPI_REG_CR2_RXNEIE_ENABLE);
+	
+	if((tmp1 != RESET) && (tmp2 != RESET)) {
+		//RXNE flag'i set edilir.
+		//data baytlarinin RX'i tutulur.
+		hal_spi_handle_rx_interrupt(hspi);
+		return;
+	}
+	
+	tmp1 = (hspi->Instance->SR & SPI_REG_SR_TXE_FLAG);
+	tmp2 = (hspi->Instance->CR2 & SPI_REG_CR2_TXEIE_ENABLE);
+	
+	if((tmp1 != RESET) && (tmp2 != RESET)) {
+		//TXE flag'i set edilir.
+		//data bayltarinin TX'i tutulur.
+		hal_spi_handle_tx_interrupt(hspi);
+		return;
+	}
+	
+}
+
+//+Özet: TXE interruptinin handle edildigi method.
+void hal_spi_handle_tx_interrupt(spi_handle_t *hspi) {
+
+	//Istenen data formatinda iletim yapilir(8 bit yada 16 bit).
+	//Tx count 0 olunca yani bütün data iletilince interrupti bitiren method çagirilir.
+	if(hspi->Init.DataSize == SPI_8BIT_DF_ENABLE) {
+		hspi->Instance->DR = (*hspi->pTxBuffPtr++);
+		hspi->TxXferCount--;
+	} else {
+		hspi->Instance->DR = *((uint16_t *)hspi->pTxBuffPtr);
+		hspi->pTxBuffPtr += 2;
+		hspi->TxXferCount -= 2;
+	}
+	
+	if(hspi->TxXferCount == 0) {
+		hal_spi_tx_close_interrupt(hspi);
+	}	
+	
+}
+
+//+Özet: TX snterrupt kapatilir ve eger gelen data iletimi devam etmiyorsa yeni data gönderilir.
+void hal_spi_tx_close_interrupt(spi_handle_t *hspi) {
+	
+	hal_spi_disable_txe_interrupt(hspi->Instance);
+	
+	if(hspi->Init.Mode && (hspi->State != HAL_SPI_STATE_BUSY_RX)) {
+		hspi->State = HAL_SPI_STATE_READY;		
+	}
+
+}
+
+//+Özet: RXNE interruptini handle et.
+void hal_spi_handle_rx_interrupt(spi_handle_t *hspi) {
+	//Istenen data formatinda iletim yapilir(8 bit yada 16 bit).
+	//Tx count 0 olunca yani bütün data iletilince interrupti bitiren method çagirilir.
+	if(hspi->Init.DataSize == SPI_8BIT_DF_ENABLE) {
+	 		//NULL check. Burada debug yap. *hspi->pRxBuffPtr'nin degerini gözlemle.
+		if(hspi->pRxBuffPtr)
+			(*hspi->pRxBuffPtr++) = hspi->Instance->DR;
+		hspi->RxXferCount--;
+	} else {
+		*((uint16_t *)hspi->pRxBuffPtr) = hspi->Instance->DR;
+		hspi->pRxBuffPtr += 2;
+		hspi->RxXferCount -= 2;
+	}
+	
+	if(hspi->RxXferCount == 0) {
+		hal_spi_close_rx_interrupt(hspi);
+	}	
+	
+}
+
+//+Özet: Alis tarafinda interrupt olup olmadigini görmek için kullanilan method.
+void hal_spi_close_rx_interrupt(spi_handle_t *hspi) {
+	
+	while(hal_spi_is_bus_busy(hspi->Instance));
+	
+	hal_spi_disable_rxne_interrupt(hspi->Instance);
+	
+	hspi->State = HAL_SPI_STATE_READY;		
+	
+}
+
+//+Özet: Bus'in mesgul olup olmadigini kontrol eder.
+uint8_t hal_spi_is_bus_busy(SPI_TypeDef *SPIx) {
+	if(SPIx->SR & SPI_REG_SR_BUSY_FLAG)
+		return SPI_IS_BUSY;
+	else
+		return SPI_IS_NOT_BUSY;
+}
+
+//+Özet: SPI muhaberes için gerekli ilklendirmeler yapilir.
+void hal_spi_init(spi_handle_t *spi_handle){
+	
+	//SPI muhaberenin faz ve polarite ayarlaniyor.
+	hal_spi_configure_phase_and_polarity(spi_handle->Instance, spi_handle->Init.CLKPhase, spi_handle->Init.CLKPolarity);
+	
+	//SPI device modu ayarla.
+	hal_spi_configure_device_mode(spi_handle->Instance, spi_handle->Init.Mode);
+	
+	//SPI'in data boyutunu set et.
+	hal_spi_configure_datasize(spi_handle->Instance, spi_handle->Init.DataSize, spi_handle->Init.Direction);
+	
+	//Slave select hattini konfigüre et. Hatirlanirsa hardware managementin yapildigi durumda birden fazla slave'in oldugu durumda
+	//NSS low yapilir baslangiçta. Software managementta ise NSS basta highdir ve high olarak kalir. Asagida ise SPI muhaberede 
+	//master taraftaysak bu seçim ile ilgili master methodunu, slave taraftaysak bu seçim ile ilgili slave modunu seçeriz.
+	if(spi_handle->Init.Mode == SPI_MASTER_MODE_SEL)
+		hal_spi_configure_nss_master(spi_handle->Instance, spi_handle->Init.NSS);
+	else
+		hal_spi_configure_nss_slave(spi_handle->Instance, spi_handle->Init.NSS);
 	
 }
 //----------------------------------------------------------------------------------------------------------------//
